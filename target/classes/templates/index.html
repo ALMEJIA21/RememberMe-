@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Inicio')}"></head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+
+<!-- Navbar Pública -->
+<header class="bg-white/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <a th:href="@{/}" class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-teal-700 dark:bg-teal-600 text-white flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/>
+                </svg>
+            </div>
+            <span class="font-display font-bold text-lg">RememberMe</span>
+        </a>
+
+        <div class="flex items-center gap-3">
+            <button type="button" onclick="toggleRememberMeTheme()"
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                <svg data-theme-icon="sun" class="w-4 h-4 hidden text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <svg data-theme-icon="moon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+                <span data-theme-label>Modo Oscuro</span>
+            </button>
+
+            <a sec:authorize="isAnonymous()" th:href="@{/auth/login}"
+               class="px-4 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                Iniciar Sesión
+            </a>
+            <a sec:authorize="isAnonymous()" th:href="@{/auth/register}"
+               class="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500 text-white text-sm font-semibold transition">
+                Crear Cuenta
+            </a>
+            <a sec:authorize="hasAuthority('ROL_CUIDADOR')" th:href="@{/cuidador/panel}"
+               class="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 text-white text-sm font-semibold transition">
+                Ir a mi Panel
+            </a>
+            <a sec:authorize="hasAuthority('ROL_PACIENTE')" th:href="@{/paciente/mi-plan}"
+               class="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 text-white text-sm font-semibold transition">
+                Ver Mi Plan
+            </a>
+            <a sec:authorize="hasAuthority('ROL_ADMIN')" th:href="@{/admin/resumen}"
+               class="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 text-white text-sm font-semibold transition">
+                Panel Admin
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Hero Principal -->
+<main class="flex-1">
+    <section class="max-w-6xl mx-auto px-6 py-14 lg:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div class="lg:col-span-6 space-y-6">
+            <div class="inline-flex items-center gap-2 text-xs font-semibold text-teal-700 dark:text-teal-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                <span>Seguridad Farmacológica Domiciliaria · Protocolo 5 Correctos</span>
+            </div>
+
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                Cada dosis a tiempo. Cuidar sin sobrecarga.
+            </h1>
+
+            <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+                RememberMe coordina tratamientos complejos en el hogar con verificación clínica de los 5 Correctos,
+                alertas de medicamentos de alto riesgo y monitoreo preventivo del desgaste del cuidador.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-4 pt-2">
+                <a th:href="@{/auth/login}"
+                   class="px-6 py-3 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500 text-white font-semibold text-sm transition">
+                    Acceder a la Plataforma
+                </a>
+                <a th:href="@{/auth/register}"
+                   class="px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold text-sm transition">
+                    Registrarme como Cuidador o Paciente
+                </a>
+            </div>
+        </div>
+
+        <div class="lg:col-span-6">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3">
+                <img th:src="@{/images/hero-home-caregiving.jpg}"
+                     alt="Acompañamiento clínico y cuidado seguro en el hogar"
+                     class="w-full h-80 sm:h-96 object-cover rounded-xl">
+            </div>
+        </div>
+    </section>
+
+    <!-- Pilares Clínicos -->
+    <section class="max-w-6xl mx-auto px-6 pb-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
+            <div class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 flex items-center justify-center mb-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h2 class="text-lg font-display font-bold">Protocolo de los 5 Correctos</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mt-2">
+                Validación guiada de paciente, fármaco, dosis, vía y hora exacta antes de marcar una toma como administrada.
+            </p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 flex items-center justify-center mb-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+            </div>
+            <h2 class="text-lg font-display font-bold">Prevención del Burnout</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mt-2">
+                Seguimiento diario de estrés, fatiga y horas de sueño con alerta temprana tras dos días consecutivos de desgaste.
+            </p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center mb-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <h2 class="text-lg font-display font-bold">Aislamiento Multi-Tenant</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mt-2">
+                Cada cuidador accede exclusivamente a sus pacientes asignados y los expedientes conservan historial inmutable.
+            </p>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

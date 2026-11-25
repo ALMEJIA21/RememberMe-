@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Aviso Clínico')}"></head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center p-6">
+<div class="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center">
+    <div class="w-12 h-12 mx-auto rounded-xl bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 flex items-center justify-center mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
+        </svg>
+    </div>
+    <p class="font-mono-tabular text-sm font-semibold text-red-700 dark:text-red-400"
+       th:text="'Error ' + (${status} ?: 404)">Error</p>
+    <h1 class="text-xl font-display font-bold mt-1" th:text="${error} ?: 'Acceso no disponible'">Acceso no disponible</h1>
+    <p class="text-sm text-slate-600 dark:text-slate-300 mt-3"
+       th:text="${message} ?: 'No tienes permisos suficientes o el recurso solicitado no existe.'"></p>
+    <div class="mt-6 flex items-center justify-center gap-3">
+        <a th:href="@{/}"
+           class="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500 text-white text-sm font-semibold transition">
+            Volver al inicio
+        </a>
+    </div>
+</div>
+</body>
+</html>
