@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Guías Clínicas')}"></head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col lg:flex-row">
+
+<aside th:replace="~{fragments/sidebar :: sidebar(${activeMenu})}"></aside>
+
+<div class="flex-1 flex flex-col min-w-0">
+    <header th:replace="~{fragments/header :: header(${breadcrumb}, null, null)}"></header>
+
+    <main class="p-6 max-w-6xl w-full mx-auto space-y-6">
+        <div th:if="${exito}" class="p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-sm" th:text="${exito}"></div>
+        <div th:if="${error}" class="p-4 rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 text-sm" th:text="${error}"></div>
+
+        <!-- Barra de búsqueda FULLTEXT + filtros + botón publicar (solo Admin) -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <form th:action="@{/guias}" method="get" class="flex-1 flex flex-wrap gap-3 min-w-[260px]">
+                    <input type="text" name="q" th:value="${termino}"
+                           placeholder="Buscar por palabras clave (ej. insulina, burnout, 5 correctos)..."
+                           class="flex-1 min-w-[220px] px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                    <select name="categoriaId"
+                            class="px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                        <option value="">Todas las categorías</option>
+                        <option th:each="cat : ${categorias}" th:value="${cat.id}" th:text="${cat.nombre}"
+                                th:selected="${categoriaIdSeleccionada != null and categoriaIdSeleccionada == cat.id}"></option>
+                    </select>
+                    <button type="submit"
+                            class="px-5 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 text-white text-sm font-semibold transition">
+                        Buscar
+                    </button>
+                </form>
+
+                <button sec:authorize="hasAuthority('ROL_ADMIN')" type="button" onclick="openModal('modalPublicarGuia')"
+                        class="px-4 py-2.5 rounded-xl border border-teal-700 dark:border-teal-500 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/40 text-sm font-semibold transition">
+                    + Publicar Guía
+                </button>
+            </div>
+        </section>
+
+        <!-- Maestro-Detalle: Listado y Lector -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Lista -->
+            <div class="lg:col-span-5 space-y-3">
+                <div th:if="${#lists.isEmpty(guias)}" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center text-sm text-slate-500">
+                    No se encontraron guías para los criterios ingresados.
+                </div>
+
+                <a th:each="g : ${guias}"
+                   th:href="@{/guias(leer=${g.id}, q=${termino}, categoriaId=${categoriaIdSeleccionada})}"
+                   th:classappend="${guiaSeleccionada != null and guiaSeleccionada.id == g.id} ? 'border-teal-700 dark:border-teal-500 bg-teal-50/40 dark:bg-teal-950/20' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'"
+                   class="block border rounded-2xl p-5 hover:border-teal-600 transition">
+                    <div class="flex items-center justify-between gap-2 text-xs text-teal-700 dark:text-teal-400 font-semibold">
+                        <span th:text="${g.categoria.nombre}">Categoría</span>
+                        <span class="font-mono-tabular text-slate-400" th:text="${#temporals.format(g.creadoEn, 'yyyy-MM-dd')}"></span>
+                    </div>
+                    <h3 class="font-display font-bold text-base mt-1.5" th:text="${g.titulo}">Título</h3>
+                    <p th:if="${g.etiquetas != null}" class="text-xs text-slate-500 dark:text-slate-400 mt-2 truncate"
+                       th:text="${g.etiquetas}"></p>
+                </a>
+            </div>
+
+            <!-- Lector -->
+            <div class="lg:col-span-7">
+                <article th:if="${guiaSeleccionada != null}"
+                         class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 space-y-5">
+                    <div class="flex flex-wrap items-center gap-2 text-xs text-teal-700 dark:text-teal-400 font-semibold">
+                        <span th:text="${guiaSeleccionada.categoria.nombre}">Categoría</span>
+                        <span class="text-slate-400">·</span>
+                        <span class="font-mono-tabular text-slate-500 dark:text-slate-400"
+                              th:text="'Publicado ' + ${#temporals.format(guiaSeleccionada.creadoEn, 'yyyy-MM-dd')}"></span>
+                    </div>
+
+                    <h2 class="text-2xl font-display font-bold leading-snug" th:text="${guiaSeleccionada.titulo}">Título</h2>
+
+                    <div class="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line border-t border-slate-200 dark:border-slate-800 pt-5"
+                         th:text="${guiaSeleccionada.contenido}">Contenido</div>
+
+                    <div th:if="${guiaSeleccionada.etiquetas != null}" class="pt-4 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+                        <span class="font-semibold">Palabras clave:</span>
+                        <span th:text="${guiaSeleccionada.etiquetas}"></span>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal Publicar Guía (exclusivo ROL_ADMIN) -->
+<div sec:authorize="hasAuthority('ROL_ADMIN')" id="modalPublicarGuia" data-modal="true"
+     class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-display font-bold">Publicar Nueva Guía Clínica</h3>
+            <button type="button" onclick="closeModal('modalPublicarGuia')" class="text-slate-400">✕</button>
+        </div>
+        <form th:action="@{/guias/publicar}" th:object="${guiaDto}" method="post" class="space-y-4">
+            <div>
+                <label class="block text-xs font-medium mb-1">Categoría</label>
+                <select th:field="*{categoriaId}" required
+                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                    <option th:each="cat : ${categorias}" th:value="${cat.id}" th:text="${cat.nombre}"></option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1">Título</label>
+                <input th:field="*{titulo}" type="text" required
+                       class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1">Contenido clínico</label>
+                <textarea th:field="*{contenido}" rows="6" required
+                          class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1">Etiquetas (separadas por coma)</label>
+                <input th:field="*{etiquetas}" type="text" placeholder="seguridad, protocolo, dosis"
+                       class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeModal('modalPublicarGuia')"
+                        class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm">Cancelar</button>
+                <button type="submit"
+                        class="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 text-white text-sm font-semibold">Publicar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

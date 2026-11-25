@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Mi Perfil Clínico')}"></head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col lg:flex-row">
+
+<aside th:replace="~{fragments/sidebar :: sidebar(${activeMenu})}"></aside>
+
+<div class="flex-1 flex flex-col min-w-0">
+    <header th:replace="~{fragments/header :: header(${breadcrumb}, 'Mi Plan de Hoy', '/paciente/mi-plan')}"></header>
+
+    <main class="p-6 max-w-5xl w-full mx-auto space-y-6">
+        <div th:if="${exito}" class="p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-sm" th:text="${exito}"></div>
+        <div th:if="${error}" class="p-4 rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 text-sm" th:text="${error}"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Edición clínica -->
+            <section class="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
+                <h2 class="text-lg font-display font-bold">Mis Datos y Alergias</h2>
+                <form th:action="@{/paciente/mi-perfil}" th:object="${pacienteDto}" method="post" class="mt-5 space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium mb-1">Nombre completo</label>
+                        <input th:field="*{nombreCompleto}" type="text" required
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1">Fecha de nacimiento</label>
+                        <input th:field="*{fechaNacimiento}" type="date"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono-tabular">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1">Alergias declaradas</label>
+                        <textarea th:field="*{alergias}" rows="2" placeholder="Ej. Penicilina, Sulfonamidas"
+                                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1">Notas clínicas relevantes</label>
+                        <textarea th:field="*{notasClinicas}" rows="3"
+                                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></textarea>
+                    </div>
+                    <button type="submit"
+                            class="px-5 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 text-white text-sm font-semibold transition">
+                        Guardar Cambios
+                    </button>
+                </form>
+            </section>
+
+            <!-- Cuidadores autorizados -->
+            <section class="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4">
+                <h2 class="text-lg font-display font-bold">Cuidadores Autorizados</h2>
+                <div th:if="${#lists.isEmpty(cuidadores)}" class="text-sm text-slate-500">
+                    Aún no tienes cuidadores vinculados.
+                </div>
+                <div class="space-y-3">
+                    <div th:each="cp : ${cuidadores}"
+                         class="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
+                        <img th:if="${cp.cuidador.avatarUrl != null}" th:src="@{${cp.cuidador.avatarUrl}}" th:alt="${cp.cuidador.nombre}"
+                             class="w-10 h-10 rounded-xl object-cover shrink-0">
+                        <div th:if="${cp.cuidador.avatarUrl == null}"
+                             class="w-10 h-10 rounded-xl bg-teal-50 text-teal-800 dark:bg-teal-950/70 dark:text-teal-200 flex items-center justify-center font-display font-bold text-sm shrink-0"
+                             th:text="${cp.cuidador.iniciales}">RM</div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold truncate" th:text="${cp.cuidador.nombre}"></p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 truncate" th:text="${cp.cuidador.correo}"></p>
+                            <p class="text-xs font-medium text-teal-700 dark:text-teal-400 mt-0.5"
+                               th:text="${cp.esPrincipal} ? 'Cuidador Principal' : 'Cuidador de Apoyo'"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

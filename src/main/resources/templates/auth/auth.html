@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Acceso Clínico')}"></head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen grid grid-cols-1 lg:grid-cols-12">
+
+<!-- Panel Lateral Izquierdo con Gradiente Clínico -->
+<section class="lg:col-span-5 bg-gradient-to-br from-teal-800 to-slate-900 text-white p-8 lg:p-12 flex flex-col justify-between">
+    <div>
+        <a th:href="@{/}" class="inline-flex items-center gap-3 text-white">
+            <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/>
+                </svg>
+            </div>
+            <span class="font-display font-bold text-xl">RememberMe</span>
+        </a>
+
+        <div class="mt-12 space-y-4">
+            <h1 class="text-3xl font-display font-bold leading-tight">
+                Gestión terapéutica segura y humana desde el hogar.
+            </h1>
+            <p class="text-sm text-teal-100/90 leading-relaxed">
+                Accede a tu turno de cuidado, plan de medicación personal o supervisión clínica con control estricto por roles.
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-10 pt-8 border-t border-white/15 space-y-3 text-xs text-teal-100/80">
+        <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-teal-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span>Verificación obligatoria de los 5 Correctos</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-teal-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span>Alertas preventivas de desgaste en cuidadores</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-teal-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span>Historial clínico protegido con borrado lógico</span>
+        </div>
+    </div>
+</section>
+
+<!-- Panel Derecho: Login y Registro -->
+<section class="lg:col-span-7 flex items-center justify-center p-6 sm:p-10">
+    <div class="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8">
+
+        <!-- Barra superior de tema y tabs -->
+        <div class="flex items-center justify-between gap-4 mb-6">
+            <div class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <a th:href="@{/auth/login}"
+                   th:classappend="${modo == 'login'} ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-600 dark:text-slate-400'"
+                   class="px-4 py-1.5 rounded-lg text-sm transition">
+                    Iniciar Sesión
+                </a>
+                <a th:href="@{/auth/register}"
+                   th:classappend="${modo == 'register'} ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-semibold' : 'text-slate-600 dark:text-slate-400'"
+                   class="px-4 py-1.5 rounded-lg text-sm transition">
+                    Crear Cuenta
+                </a>
+            </div>
+
+            <button type="button" onclick="toggleRememberMeTheme()"
+                    class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                    title="Cambiar tema">
+                <svg data-theme-icon="sun" class="w-4 h-4 hidden text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <svg data-theme-icon="moon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mensajes de feedback -->
+        <div th:if="${exito}" class="mb-4 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-sm flex items-center gap-2">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span th:text="${exito}"></span>
+        </div>
+
+        <div th:if="${param.error}" class="mb-4 p-3.5 rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 text-sm flex items-center gap-2">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Correo o contraseña incorrectos. Verifica tus credenciales.</span>
+        </div>
+
+        <div th:if="${param.logout}" class="mb-4 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm flex items-center gap-2">
+            <svg class="w-4 h-4 shrink-0 text-teal-700 dark:text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span>Sesión cerrada de forma segura.</span>
+        </div>
+
+        <!-- MODO LOGIN -->
+        <div th:if="${modo == 'login'}">
+            <h2 class="text-2xl font-display font-bold">Bienvenido de nuevo</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Ingresa con tu cuenta institucional o familiar.</p>
+
+            <form th:action="@{/auth/login}" method="post" class="mt-6 space-y-4">
+                <div>
+                    <label for="loginCorreo" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Correo electrónico</label>
+                    <input id="loginCorreo" name="correo" type="email" required autocomplete="email"
+                           placeholder="nombre@rememberme.care"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                </div>
+
+                <div>
+                    <label for="loginContrasena" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Contraseña</label>
+                    <input id="loginContrasena" name="contrasena" type="password" required autocomplete="current-password"
+                           placeholder="••••••••"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                </div>
+
+                <button type="submit"
+                        class="w-full py-2.5 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500 text-white font-semibold text-sm transition">
+                    Iniciar Sesión
+                </button>
+            </form>
+
+            <!-- Accesos rápidos de demostración / desarrollo -->
+            <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+                    Rellenado rápido de prueba (Desarrollo)
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button type="button" onclick="rellenarCredencialesDemo('sofia.mendoza@rememberme.care', 'Cuidador2026!')"
+                            class="text-left p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 hover:border-teal-600 transition">
+                        <p class="text-xs font-semibold text-teal-700 dark:text-teal-400">Cuidador Principal</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 truncate">Sofía Mendoza</p>
+                    </button>
+                    <button type="button" onclick="rellenarCredencialesDemo('mateo.rios@rememberme.care', 'Cuidador2026!')"
+                            class="text-left p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 hover:border-teal-600 transition">
+                        <p class="text-xs font-semibold text-teal-700 dark:text-teal-400">Cuidador Apoyo</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 truncate">Mateo Ríos</p>
+                    </button>
+                    <button type="button" onclick="rellenarCredencialesDemo('elena.morales@rememberme.care', 'Paciente2026!')"
+                            class="text-left p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 hover:border-teal-600 transition">
+                        <p class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Paciente</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 truncate">Elena Morales</p>
+                    </button>
+                    <button type="button" onclick="rellenarCredencialesDemo('admin@rememberme.care', 'Admin2026!')"
+                            class="text-left p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 hover:border-teal-600 transition">
+                        <p class="text-xs font-semibold text-amber-700 dark:text-amber-400">Administrador</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 truncate">Dr. Carlos Vega</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODO REGISTRO PÚBLICO -->
+        <div th:if="${modo == 'register'}">
+            <h2 class="text-2xl font-display font-bold">Crear cuenta en RememberMe</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                El registro público está habilitado exclusivamente para Cuidadores y Pacientes.
+            </p>
+
+            <div th:if="${errorRegistro}" class="mt-4 p-3.5 rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 text-sm flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span th:text="${errorRegistro}"></span>
+            </div>
+
+            <form th:action="@{/auth/register}" th:object="${registroDto}" method="post" class="mt-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1.5">Tipo de cuenta</label>
+                    <select th:field="*{rol}" onchange="toggleCamposPacienteRegistro(this.value)"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                        <option value="ROL_CUIDADOR">Cuidador familiar o profesional</option>
+                        <option value="ROL_PACIENTE">Paciente (crea expediente propio)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1.5">Nombre completo</label>
+                    <input th:field="*{nombre}" type="text" required placeholder="Ej. Laura Gómez"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                    <p th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="text-xs text-red-600 dark:text-red-400 mt-1"></p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1.5">Correo electrónico</label>
+                    <input th:field="*{correo}" type="email" required placeholder="laura@ejemplo.com"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                    <p th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}" class="text-xs text-red-600 dark:text-red-400 mt-1"></p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1.5">Contraseña (mínimo 8 caracteres)</label>
+                    <input th:field="*{contrasena}" type="password" required minlength="8" placeholder="••••••••"
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600">
+                    <p th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}" class="text-xs text-red-600 dark:text-red-400 mt-1"></p>
+                </div>
+
+                <!-- Campos extra si el usuario selecciona ROL_PACIENTE -->
+                <div id="camposPacienteRegistro"
+                     th:classappend="${registroDto.rol != null and registroDto.rol.name() == 'ROL_PACIENTE'} ? '' : 'hidden'"
+                     class="space-y-4 pt-2 border-t border-slate-200 dark:border-slate-800">
+                    <div>
+                        <label class="block text-sm font-medium mb-1.5">Fecha de nacimiento (opcional)</label>
+                        <input th:field="*{fechaNacimiento}" type="date"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1.5">Alergias conocidas (opcional)</label>
+                        <input th:field="*{alergias}" type="text" placeholder="Ej. Penicilina, Ibuprofeno"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="w-full py-2.5 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500 text-white font-semibold text-sm transition">
+                    Crear Cuenta Segura
+                </button>
+            </form>
+        </div>
+
+    </div>
+</section>
+
+</body>
+</html>

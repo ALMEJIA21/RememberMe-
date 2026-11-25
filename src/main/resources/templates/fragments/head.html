@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' · RememberMe'">RememberMe</title>
+
+    <!-- Script anti-flash de tema Claro/Oscuro -->
+    <script>
+        (function () {
+            const saved = localStorage.getItem('rememberme-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+
+    <!-- Google Fonts: Plus Jakarta Sans, Public Sans, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN configurado con darkMode: 'class' -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+                        sans: ['"Public Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        };
+    </script>
+
+    <link rel="stylesheet" th:href="@{/css/rememberme.css}">
+    <script defer th:src="@{/js/theme-and-modals.js}"></script>
+</head>
+</html>

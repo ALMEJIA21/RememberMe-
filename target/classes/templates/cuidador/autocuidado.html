@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Mi Autocuidado')}"></head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col lg:flex-row">
+
+<aside th:replace="~{fragments/sidebar :: sidebar(${activeMenu})}"></aside>
+
+<div class="flex-1 flex flex-col min-w-0">
+    <header th:replace="~{fragments/header :: header(${breadcrumb}, 'Volver al Panel', '/cuidador/panel')}"></header>
+
+    <main class="p-6 max-w-6xl w-full mx-auto space-y-6">
+        <div th:if="${exito}" class="p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-sm" th:text="${exito}"></div>
+        <div th:if="${error}" class="p-4 rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 text-sm" th:text="${error}"></div>
+
+        <!-- Alerta 2 días consecutivos -->
+        <div th:if="${alertaAutocuidado}"
+             class="p-5 rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/35 text-amber-700 dark:text-amber-400 flex items-start gap-3">
+            <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
+            </svg>
+            <div>
+                <p class="font-display font-bold text-sm">Alerta activa de desgaste físico/emocional (2 días consecutivos)</p>
+                <p class="text-xs mt-1">Tu nivel de estrés o fatiga ha sido ≥ 4/5 en dos jornadas seguidas. El administrador ha sido notificado para coordinar apoyo de relevo.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Check-in diario -->
+            <section class="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
+                <h2 class="text-lg font-display font-bold">Check-in Diario de Bienestar</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Evalúa tu estado del día en escala clínica del 1 (bajo) al 5 (muy alto).</p>
+
+                <form th:action="@{/cuidador/autocuidado}" th:object="${bienestarDto}" method="post" class="mt-5 space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium mb-1">Fecha de registro</label>
+                        <input th:field="*{fechaRegistro}" type="date" required
+                               class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono-tabular">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium mb-1">Nivel de estrés (1-5)</label>
+                            <select th:field="*{nivelEstres}" required
+                                    class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono-tabular">
+                                <option value="1">1 · Muy bajo</option>
+                                <option value="2">2 · Bajo</option>
+                                <option value="3">3 · Moderado</option>
+                                <option value="4">4 · Alto</option>
+                                <option value="5">5 · Crítico</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1">Nivel de fatiga (1-5)</label>
+                            <select th:field="*{nivelFatiga}" required
+                                    class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono-tabular">
+                                <option value="1">1 · Descansado</option>
+                                <option value="2">2 · Leve</option>
+                                <option value="3">3 · Moderada</option>
+                                <option value="4">4 · Alta</option>
+                                <option value="5">5 · Agotamiento</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium mb-1">Horas de sueño (0-24)</label>
+                            <input th:field="*{horasSueno}" type="number" step="0.5" min="0" max="24" required placeholder="7.0"
+                                   class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono-tabular">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1">Estado emocional</label>
+                            <input th:field="*{estadoEmocional}" type="text" placeholder="Sereno, Cansado..."
+                                   class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium mb-1">Nota reflexiva (opcional)</label>
+                        <textarea th:field="*{nota}" rows="3" placeholder="¿Cómo fue tu jornada hoy?"
+                                  class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></textarea>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-2.5 px-4 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500 text-white font-semibold text-sm transition">
+                        Guardar Check-in
+                    </button>
+                </form>
+            </section>
+
+            <!-- Historial -->
+            <section class="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+                    <h3 class="text-base font-display font-bold">Historial Reciente de Autocuidado</h3>
+                </div>
+                <div class="divide-y divide-slate-200 dark:divide-slate-800">
+                    <div th:if="${#lists.isEmpty(historial)}" class="p-8 text-center text-sm text-slate-500">
+                        Aún no tienes registros de bienestar.
+                    </div>
+                    <div th:each="reg : ${historial}" class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2 text-sm">
+                                <span class="font-mono-tabular font-semibold" th:text="${#temporals.format(reg.fechaRegistro, 'yyyy-MM-dd')}">2026-11-23</span>
+                                <span class="text-slate-400">·</span>
+                                <span class="font-medium" th:text="${reg.estadoEmocional} ?: 'Sin etiqueta'">Sereno</span>
+                                <span th:if="${reg.esDiaDeDesgasteAlto()}" class="text-slate-400">·</span>
+                                <span th:if="${reg.esDiaDeDesgasteAlto()}" class="text-xs font-semibold text-amber-700 dark:text-amber-400">Desgaste alto</span>
+                            </div>
+                            <p th:if="${reg.nota != null}" class="text-xs text-slate-600 dark:text-slate-300" th:text="${reg.nota}"></p>
+                        </div>
+
+                        <div class="flex items-center gap-4 text-xs font-mono-tabular shrink-0">
+                            <span>Estrés: <strong th:text="${reg.nivelEstres} + '/5'">3/5</strong></span>
+                            <span>Fatiga: <strong th:text="${reg.nivelFatiga} + '/5'">3/5</strong></span>
+                            <span>Sueño: <strong th:text="${reg.horasSueno} + ' h'">7 h</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

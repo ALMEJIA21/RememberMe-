@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Pacientes y Tratamientos')}"></head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col lg:flex-row">
+
+<aside th:replace="~{fragments/sidebar :: sidebar(${activeMenu})}"></aside>
+
+<div class="flex-1 flex flex-col min-w-0">
+    <header th:replace="~{fragments/header :: header(${breadcrumb}, null, null)}"></header>
+
+    <main class="p-6 max-w-6xl w-full mx-auto space-y-6">
+        <div th:if="${exito}" class="p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 text-sm" th:text="${exito}"></div>
+        <div th:if="${error}" class="p-4 rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 text-sm" th:text="${error}"></div>
+
+        <!-- Botones de acción -->
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <h2 class="text-lg font-display font-bold">Pacientes a mi cargo</h2>
+            <div class="flex flex-wrap gap-3">
+                <button type="button" onclick="openModal('modalNuevoPaciente')"
+                        class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    + Nuevo Paciente
+                </button>
+                <button type="button" onclick="openModal('modalNuevoMedicamento')"
+                        class="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500 text-white text-sm font-semibold transition">
+                    + Añadir Medicamento
+                </button>
+            </div>
+        </div>
+
+        <!-- Tarjetas de pacientes vinculados -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div th:each="v : ${vinculos}" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between gap-4">
+                <div class="space-y-3">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <img th:if="${v.paciente.avatarUrl != null}" th:src="@{${v.paciente.avatarUrl}}" th:alt="${v.paciente.nombreCompleto}"
+                                 class="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-slate-700">
+                            <div th:if="${v.paciente.avatarUrl == null}"
+                                 class="w-12 h-12 rounded-xl bg-teal-50 text-teal-800 dark:bg-teal-950/70 dark:text-teal-200 flex items-center justify-center font-display font-bold"
+                                 th:text="${v.paciente.iniciales}">PC</div>
+                            <div>
+                                <h3 class="font-display font-bold text-base" th:text="${v.paciente.nombreCompleto}">Paciente</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    <span th:if="${v.paciente.edad != null}" th:text="${v.paciente.edad} + ' años'"></span>
+                                    <span th:if="${v.paciente.edad != null}"> · </span>
+                                    <span th:text="${v.esPrincipal} ? 'Cuidador Principal' : 'Cuidador de Apoyo'"
+                                          class="text-teal-700 dark:text-teal-400 font-medium"></span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <form th:action="@{/cuidador/pacientes/{id}/desactivar(id=${v.paciente.id})}" method="post"
+                              onsubmit="return confirm('¿Archivar este paciente? Se conservará todo su historial clínico.');">
+                            <button type="submit" class="text-xs text-red-700 dark:text-red-400 hover:underline font-medium">Archivar</button>
+                        </form>
+                    </div>
+
+                    <div th:if="${v.paciente.alergias != null and !v.paciente.alergias.isBlank()}"
+                         class="p-3 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/35 text-amber-700 dark:text-amber-400 text-xs">
+                        <strong>Alergias:</strong> <span th:text="${v.paciente.alergias}"></span>
+                    </div>
+
+                    <p th:if="${v.paciente.notasClinicas != null}" class="text-xs text-slate-600 dark:text-slate-300"
+                       th:text="${v.paciente.notasClinicas}"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Medicamentos Activos -->
+        <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+                <h3 class="text-base font-display font-bold">Fórmulas Activas</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 dark:bg-slate-800/70 text-xs text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                    <tr>
+                        <th class="px-5 py-3">Paciente</th>
+                        <th class="px-5 py-3">Medicamento</th>
+                        <th class="px-5 py-3">Dosis · Vía</th>
+                        <th class="px-5 py-3">Frecuencia</th>
+                        <th class="px-5 py-3">Riesgo</th>
+                        <th class="px-5 py-3 text-right">Acción</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tr th:each="med : ${medicamentos}">
+                        <td class="px-5 py-3.5 font-medium" th:text="${med.paciente.nombreCompleto}"></td>
+                        <td class="px-5 py-3.5">
+                            <p class="font-semibold" th:text="${med.nombre}"></p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400" th:text="${med.principioActivo}"></p>
+                        </td>
+                        <td class="px-5 py-3.5 font-mono-tabular" th:text="${med.dosisFormateada} + ' · ' + ${med.viaAdministracion.etiqueta}"></td>
+                        <td class="px-5 py-3.5 font-mono-tabular" th:text="'Cada ' + ${med.frecuenciaHoras} + ' h'"></td>
+                        <td class="px-5 py-3.5">
+                            <span th:if="${med.esAltoRiesgo}" class="text-xs font-semibold text-red-700 dark:text-red-400">Alto riesgo</span>
+                            <span th:if="${!med.esAltoRiesgo}" class="text-xs text-slate-500 dark:text-slate-400">Estándar</span>
+                        </td>
+                        <td class="px-5 py-3.5 text-right">
+                            <form th:action="@{/cuidador/medicamentos/{id}/desactivar(id=${med.id})}" method="post"
+                                  onsubmit="return confirm('¿Suspender este medicamento del plan activo?');">
+                                <button type="submit" class="text-xs text-red-700 dark:text-red-400 hover:underline font-medium">Suspender</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal Nuevo Paciente -->
+<div id="modalNuevoPaciente" data-modal="true" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-display font-bold">Registrar Paciente</h3>
+            <button type="button" onclick="closeModal('modalNuevoPaciente')" class="text-slate-400 hover:text-slate-600">✕</button>
+        </div>
+        <form th:action="@{/cuidador/pacientes}" th:object="${pacienteDto}" method="post" class="space-y-4">
+            <div>
+                <label class="block text-xs font-medium mb-1">Nombre completo</label>
+                <input th:field="*{nombreCompleto}" type="text" required
+                       class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1">Fecha de nacimiento</label>
+                <input th:field="*{fechaNacimiento}" type="date"
+                       class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1">Alergias</label>
+                <input th:field="*{alergias}" type="text" placeholder="Ej. Penicilina"
+                       class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1">Notas clínicas</label>
+                <textarea th:field="*{notasClinicas}" rows="3"
+                          class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></textarea>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeModal('modalNuevoPaciente')"
+                        class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm">Cancelar</button>
+                <button type="submit"
+                        class="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 text-white text-sm font-semibold">Guardar Paciente</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Nuevo Medicamento -->
+<div id="modalNuevoMedicamento" data-modal="true" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-display font-bold">Añadir Medicamento al Plan</h3>
+            <button type="button" onclick="closeModal('modalNuevoMedicamento')" class="text-slate-400 hover:text-slate-600">✕</button>
+        </div>
+        <form th:action="@{/cuidador/medicamentos}" th:object="${medicamentoDto}" method="post" class="space-y-4">
+            <div>
+                <label class="block text-xs font-medium mb-1">Paciente</label>
+                <select th:field="*{pacienteId}" required
+                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                    <option th:each="v : ${vinculos}" th:value="${v.paciente.id}" th:text="${v.paciente.nombreCompleto}"></option>
+                </select>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium mb-1">Nombre comercial</label>
+                    <input th:field="*{nombre}" type="text" required placeholder="Ej. Losartán"
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1">Principio activo</label>
+                    <input th:field="*{principioActivo}" type="text" placeholder="Ej. Losartán potásico"
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-medium mb-1">Dosis</label>
+                    <input th:field="*{cantidadDosis}" type="number" step="0.01" min="0.01" required
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono-tabular">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1">Unidad</label>
+                    <input th:field="*{unidadDosis}" type="text" required placeholder="mg, mL, UI"
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1">Cada (horas)</label>
+                    <input th:field="*{frecuenciaHoras}" type="number" min="1" max="720" required
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono-tabular">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium mb-1">Vía de administración</label>
+                    <select th:field="*{viaAdministracion}" required
+                            class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                        <option th:each="via : ${vias}" th:value="${via}" th:text="${via.etiqueta}"></option>
+                    </select>
+                </div>
+                <div class="flex items-end pb-2">
+                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                        <input th:field="*{esAltoRiesgo}" type="checkbox" class="rounded text-red-700">
+                        <span class="font-medium text-red-700 dark:text-red-400">Medicamento de alto riesgo</span>
+                    </label>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium mb-1">Inicio de toma</label>
+                    <input th:field="*{fechaHoraInicio}" type="datetime-local" required
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono-tabular">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1">Fecha fin (opcional)</label>
+                    <input th:field="*{fechaFin}" type="date"
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono-tabular">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium mb-1">Instrucciones clínicas</label>
+                <textarea th:field="*{instrucciones}" rows="2" placeholder="Ej. Tomar con alimentos..."
+                          class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeModal('modalNuevoMedicamento')"
+                        class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm">Cancelar</button>
+                <button type="submit"
+                        class="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 text-white text-sm font-semibold">Guardar Fórmula</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
